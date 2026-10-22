@@ -16,3 +16,9 @@ docs/
 # Signing
 *.jks
 *.keystore
+
+/vedio_recordings
+/test-output
+/promo
+/screen_shots
+/compressed
