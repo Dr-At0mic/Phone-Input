@@ -1,0 +1,18 @@
+.gradle/
+.kotlin/
+build/
+local.properties
+.idea/
+*.iml
+.DS_Store
+captures/
+/LINUX_TESTING.md
+# Agent / internal files (kept local)
+AGENTS.md
+CLAUDE.md
+.claude/
+docs/
+
+# Signing
+*.jks
+*.keystore
