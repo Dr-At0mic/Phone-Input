@@ -33,9 +33,11 @@ Get the latest build from [Releases](https://github.com/Dr-At0mic/Phone-Input/re
 | Platform | File |
 |---|---|
 | Android 8.0+ | `PhoneInput-<version>.apk` |
-| Windows 10/11 | `PhoneInput-<version>.msi` |
+| Windows 10/11 | `PhoneInput-<version>.exe` or `PhoneInput-<version>.msi` (same installer, pick either) |
 | Linux (Debian / Ubuntu) — beta | `phoneinput_<version>_amd64.deb` |
 | Linux (Fedora / openSUSE) — beta | `phoneinput-<version>.x86_64.rpm` |
+
+Windows: the installer adds PhoneInput to the Start Menu and the desktop. To start it automatically when you sign in, tick **Start with Windows** in its tray menu.
 
 Linux support is **beta**: it has not yet been tested end to end on real hardware, so please report any issues. macOS and iOS are planned.
 
@@ -45,7 +47,7 @@ PhoneInput updates itself from this repository's [Releases](https://github.com/D
 
 - It checks when it starts and every few hours (desktop) or when you open it (Android), then downloads the new version in the background. Android only downloads on Wi-Fi or another unmetered network. Each download is checked against the release's `SHA256SUMS.txt`.
 - When the download is ready, a banner offers **Restart to update** (desktop) or **Install** (Android). Nothing installs until you choose it.
-- **Windows** runs the new MSI (approve the UAC prompt), then restarts PhoneInput.
+- **Windows** runs the new MSI, whichever installer you used (approve the UAC prompt), then restarts PhoneInput.
 - **Linux** installs the new `.deb`/`.rpm` through your package manager (enter your password in the polkit prompt), then restarts PhoneInput. Copies not installed from a package only get a link to the releases page.
 - **Android** asks once to let PhoneInput install apps and shows Android's install confirmation. On Android 12+ later updates usually install without asking.
 - To turn automatic checks off: Settings › Updates on Android, or **Update automatically** in the tray menu on desktop. The sidebar (desktop) and Settings (Android) can check manually.

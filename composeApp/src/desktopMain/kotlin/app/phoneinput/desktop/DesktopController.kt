@@ -14,6 +14,7 @@ import app.phoneinput.desktop.net.BluetoothBridge
 import app.phoneinput.desktop.net.BluetoothStatus
 import app.phoneinput.desktop.net.SpeakerStreamer
 import app.phoneinput.desktop.net.UsbStatus
+import app.phoneinput.desktop.win.Autostart
 import app.phoneinput.protocol.PairingInfo
 import app.phoneinput.protocol.PairingUri
 import app.phoneinput.protocol.HostOs
@@ -65,6 +66,8 @@ data class DesktopState(
     val update: UpdateState = UpdateState.Idle,
     /** Look for updates on start and every few hours, and download them in the background. */
     val autoUpdate: Boolean = true,
+    /** Installed Windows builds only: a sign-in entry starts PhoneInput hidden in the tray. */
+    val startWithWindows: Boolean = false,
     /** The user chose "Later" for this version; the banner stays hidden until a newer one appears. */
     val dismissedUpdate: AppVersion? = null,
 ) {
@@ -88,6 +91,7 @@ class DesktopController : AutoCloseable {
             monitor = prefs.getBoolean(KEY_MONITOR, false),
             canInstallDriver = HostInfo.os == HostOs.Windows,
             autoUpdate = prefs.getBoolean(KEY_AUTO_UPDATE, true),
+            startWithWindows = Autostart.isEnabled(),
         ),
     )
     val state: StateFlow<DesktopState> = _state.asStateFlow()
@@ -258,6 +262,10 @@ class DesktopController : AutoCloseable {
         _state.update { it.copy(autoUpdate = on) }
         prefs.putBoolean(KEY_AUTO_UPDATE, on)
         if (on) updater.check(autoDownload = true)
+    }
+
+    fun setStartWithWindows(on: Boolean) {
+        if (Autostart.setEnabled(on)) _state.update { it.copy(startWithWindows = on) }
     }
 
     fun setMuted(muted: Boolean) = _state.update { it.copy(muted = muted) }

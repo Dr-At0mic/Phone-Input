@@ -9,7 +9,7 @@ plugins {
 }
 
 /** App version for the APK and desktop installers; CI passes the tag (v1.2.3 → 1.2.3) with -PappVersion. */
-val appVersion = (findProperty("appVersion") as String?)?.removePrefix("v") ?: "1.1.0"
+val appVersion = (findProperty("appVersion") as String?)?.removePrefix("v") ?: "1.1.1"
 
 kotlin {
     // jvmSharedMain: code for both JVM platforms (Android and desktop), e.g. HTTP downloads for updates.
@@ -112,11 +112,15 @@ compose.desktop {
         mainClass = "app.phoneinput.desktop.MainKt"
 
         nativeDistributions {
-            targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
+            targetFormats(TargetFormat.Msi, TargetFormat.Exe, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = "PhoneInput"
             windows {
                 // Fixed so each new MSI replaces the installed version (the value v1.0.0 shipped with).
                 upgradeUuid = "2CCCE26B-1393-384B-94A2-49ED8BCB690A"
+                // Start Menu entry and desktop shortcut; the .exe is jpackage's wrapper around the same MSI.
+                menu = true
+                menuGroup = "PhoneInput"
+                shortcut = true
             }
             packageVersion = appVersion
             description = "Use your phone as a microphone"

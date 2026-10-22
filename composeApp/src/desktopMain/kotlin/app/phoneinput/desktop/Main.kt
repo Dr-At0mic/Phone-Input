@@ -29,6 +29,7 @@ import app.phoneinput.desktop.ui.TitleStatus
 import app.phoneinput.desktop.ui.TitleText
 import app.phoneinput.desktop.ui.WindowChrome
 import app.phoneinput.desktop.ui.WindowFrame
+import app.phoneinput.desktop.win.Autostart
 import app.phoneinput.ui.icons.PmIcons
 import app.phoneinput.update.UpdateState
 import app.phoneinput.ui.theme.PhoneInputTheme
@@ -37,7 +38,7 @@ import java.awt.SystemTray
 import javax.swing.JOptionPane
 import kotlin.system.exitProcess
 
-fun main() {
+fun main(args: Array<String>) {
     val controller = DesktopController()
     if (!controller.bindPorts()) {
         JOptionPane.showMessageDialog(
@@ -50,18 +51,19 @@ fun main() {
         exitProcess(1)
     }
     controller.start()
-    runApp(controller)
+    runApp(controller, startInTray = Autostart.TRAY_ARG in args)
 }
 
 private val digitKeys = listOf(Key.One, Key.Two, Key.Three, Key.Four, Key.Five, Key.Six, Key.Seven, Key.Eight, Key.Nine)
 
-private fun runApp(controller: DesktopController) = application {
+private fun runApp(controller: DesktopController, startInTray: Boolean) = application {
     DisposableEffect(Unit) { onDispose { controller.close() } }
 
     val state by controller.state.collectAsState()
-    var windowVisible by remember { mutableStateOf(true) }
-    val appIcon = rememberVectorPainter(PmIcons.AppMark)
     val traySupported = remember { SystemTray.isSupported() }
+    // Started at sign-in: stay in the tray until the user opens the window.
+    var windowVisible by remember { mutableStateOf(!(startInTray && traySupported)) }
+    val appIcon = rememberVectorPainter(PmIcons.AppMark)
     val windowState = rememberWindowState(width = 1120.dp, height = 740.dp, position = WindowPosition(Alignment.Center))
 
     val quit = {
@@ -89,6 +91,9 @@ private fun runApp(controller: DesktopController) = application {
                 Item("Show PhoneInput", onClick = { windowVisible = true })
                 if (state.update !is UpdateState.Disabled) {
                     CheckboxItem("Update automatically", checked = state.autoUpdate, onCheckedChange = controller::setAutoUpdate)
+                }
+                if (Autostart.supported) {
+                    CheckboxItem("Start with Windows", checked = state.startWithWindows, onCheckedChange = controller::setStartWithWindows)
                 }
                 Separator()
                 Item("Quit", onClick = quit)
