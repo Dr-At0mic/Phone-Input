@@ -2,10 +2,9 @@ Use your Android phone as a microphone for your Windows or Linux computer, over 
 
 ## What's new
 
-- **Windows `.exe` installer.** Download `PhoneInput-*.exe` if you're not sure what an `.msi` is. Both install the same app, so use either one.
-- **Start Menu and desktop shortcuts.** The Windows installer now adds PhoneInput to the Start Menu and the desktop. Earlier versions put it only in `C:\Program Files\PhoneInput`.
-- **Start with Windows.** Tick it in the tray menu, and PhoneInput starts hidden in the tray when you sign in.
-- Updating from v1.1.0 works as usual (**Restart to update**). Coming from v1.0.0? Install this version by hand once.
+- **PhoneInput icon on Windows and Linux.** The installer, Start Menu and desktop shortcuts, and the Linux app menu now show the PhoneInput icon. v1.1.1 showed the Kotlin logo there.
+- Windows remembers shortcut icons. If the old icon still shows after updating, sign out and back in.
+- Updating from v1.1.0 or v1.1.1 works as usual (**Restart to update**). Coming from v1.0.0? Install this version by hand once.
 
 ## Downloads
 

@@ -9,7 +9,7 @@ plugins {
 }
 
 /** App version for the APK and desktop installers; CI passes the tag (v1.2.3 → 1.2.3) with -PappVersion. */
-val appVersion = (findProperty("appVersion") as String?)?.removePrefix("v") ?: "1.1.1"
+val appVersion = (findProperty("appVersion") as String?)?.removePrefix("v") ?: "1.1.2"
 
 kotlin {
     // jvmSharedMain: code for both JVM platforms (Android and desktop), e.g. HTTP downloads for updates.
@@ -121,6 +121,8 @@ compose.desktop {
                 menu = true
                 menuGroup = "PhoneInput"
                 shortcut = true
+                // Shell icon for the .exe, shortcuts and Add/Remove Programs (the window/tray icon is drawn in code).
+                iconFile.set(project.file("packaging/icon.ico"))
             }
             packageVersion = appVersion
             description = "Use your phone as a microphone"
@@ -132,6 +134,7 @@ compose.desktop {
                 menuGroup = "AudioVideo;Audio;"
                 debMaintainer = "92196795+Dr-At0mic@users.noreply.github.com"
                 rpmLicenseType = "GPL-3.0-only"
+                iconFile.set(project.file("packaging/icon.png"))
             }
         }
     }
