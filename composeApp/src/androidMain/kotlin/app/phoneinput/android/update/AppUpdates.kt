@@ -1,5 +1,7 @@
 package app.phoneinput.android.update
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -12,7 +14,10 @@ import android.os.Build
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
 import androidx.core.content.IntentCompat
+import app.phoneinput.R
+import app.phoneinput.android.MainActivity
 import app.phoneinput.update.AppVersion
 import app.phoneinput.update.Release
 import app.phoneinput.update.UpdateState
@@ -125,5 +130,41 @@ class UpdateInstallReceiver : BroadcastReceiver() {
                 intent.getStringExtra(PackageInstaller.EXTRA_STATUS_MESSAGE)?.let { "Update failed: $it" } ?: "Update failed.",
             )
         }
+    }
+}
+
+/**
+ * After an update Android stops the old app and doesn't reopen it (apps may not start activities
+ * from the background), so tell the user it's done and let them open the new version.
+ */
+class UpdatedReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
+        val manager = context.getSystemService(NotificationManager::class.java) ?: return
+        manager.createNotificationChannel(
+            NotificationChannel(CHANNEL_ID, "Updates", NotificationManager.IMPORTANCE_DEFAULT).apply {
+                description = "Shown when PhoneInput has been updated"
+            },
+        )
+        val version = context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        val open = PendingIntent.getActivity(
+            context,
+            0,
+            Intent(context, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_stat_mic)
+            .setContentTitle("PhoneInput updated to $version")
+            .setContentText("Tap to open it.")
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .build()
+        runCatching { manager.notify(NOTIFICATION_ID, notification) } // no-op without notification permission
+    }
+
+    private companion object {
+        const val CHANNEL_ID = "updates"
+        const val NOTIFICATION_ID = 2
     }
 }

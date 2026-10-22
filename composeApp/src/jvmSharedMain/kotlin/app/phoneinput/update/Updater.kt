@@ -96,7 +96,10 @@ class Updater(
             val checksums = release.asset(ReleaseFeed.CHECKSUMS)?.let { ReleaseFeed.parseChecksums(fetchText(it.url)) }.orEmpty()
             val expected = checksums[asset.name] ?: throw IOException("This release has no checksum for ${asset.name}.")
             downloadDir.mkdirs()
-            downloadDir.listFiles()?.filter { it.name != asset.name }?.forEach { it.delete() }
+            // Drop older downloads; keep everything else (the desktop installer's script and log live here).
+            downloadDir.listFiles()
+                ?.filter { it.name != asset.name && it.extension in setOf("apk", "msi", "deb", "rpm", "part") }
+                ?.forEach { it.delete() }
             val target = File(downloadDir, asset.name)
             if (!target.isFile || sha256(target) != expected) {
                 downloadFile(asset, target) { p -> _state.value = UpdateState.Downloading(release, p) }
