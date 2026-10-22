@@ -9,7 +9,7 @@ plugins {
 }
 
 /** App version for the APK and desktop installers; CI passes the tag (v1.2.3 → 1.2.3) with -PappVersion. */
-val appVersion = (findProperty("appVersion") as String?)?.removePrefix("v") ?: "1.0.0"
+val appVersion = (findProperty("appVersion") as String?)?.removePrefix("v") ?: "1.1.0"
 
 kotlin {
     // jvmSharedMain: code for both JVM platforms (Android and desktop), e.g. HTTP downloads for updates.

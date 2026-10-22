@@ -1,5 +1,10 @@
 Use your Android phone as a microphone for your Windows or Linux computer, over Wi-Fi, USB or Bluetooth.
 
+## What's new
+
+- **Automatic updates.** PhoneInput now checks this page for new versions, downloads them in the background, verifies them, and installs with one click (**Restart to update** on desktop, **Install** on Android). Coming from v1.0.0? Install this version by hand once; later versions update themselves.
+- Android shows a notification after updating; tap it to reopen PhoneInput.
+
 ## Downloads
 
 | Platform | File | Status |
