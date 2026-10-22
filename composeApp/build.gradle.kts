@@ -111,7 +111,7 @@ compose.desktop {
                 packageName = "phoneinput"
                 appCategory = "sound"
                 menuGroup = "AudioVideo;Audio;"
-                debMaintainer = "Dr-At0mic <92196795+Dr-At0mic@users.noreply.github.com>"
+                debMaintainer = "92196795+Dr-At0mic@users.noreply.github.com"
                 rpmLicenseType = "GPL-3.0-only"
             }
         }
