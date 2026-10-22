@@ -126,12 +126,15 @@ class PulseVirtualMic : VirtualMic {
 /**
  * Linux without pulseaudio-utils (stock Ubuntu with PipeWire): a `pw-loopback` process provides
  * the "PhoneInput Output" sink and the "PhoneInput Microphone" source, and pw-cat plays into the
- * sink. Both nodes disappear when the process ends, so nothing is left behind after a crash.
+ * sink. Both nodes live only as long as that process. A small shell wrapper ends it as soon as
+ * our pipe to its stdin closes, which also happens when PhoneInput is killed or crashes, so the
+ * devices never outlive the app.
  */
 class PipeWireVirtualMic : VirtualMic {
     private val loopback: Process? = runCatching {
         ProcessBuilder(
-            "pw-loopback", "--name=phoneinput",
+            "sh", "-c", "exec 3<&0; pw-loopback \"\$@\" & p=\$!; { read _ <&3; kill \$p; } & wait \$p", "sh",
+            "--name=phoneinput",
             "--capture-props={ media.class=Audio/Sink node.name=$SINK node.description=\"PhoneInput Output\" audio.position=[MONO] }",
             "--playback-props={ media.class=Audio/Source node.name=$SOURCE node.description=\"PhoneInput Microphone\" audio.position=[MONO] }",
         )
@@ -154,7 +157,7 @@ class PipeWireVirtualMic : VirtualMic {
     override fun openOutput(): AudioOutput? = if (status.ready) PipedOutput.pwCat(SINK) else null
 
     override fun close() {
-        loopback?.destroy()
+        loopback?.let { runCatching { it.outputStream.close() } }
     }
 
     private companion object {
