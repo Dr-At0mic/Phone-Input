@@ -2,7 +2,22 @@
 
 Use your Android phone as a microphone for your Windows or Linux (beta) computer, over Wi-Fi, USB or Bluetooth.
 
+https://github.com/user-attachments/assets/7dff6e40-04e6-46e1-a393-43e5d807e170
+
 The phone app captures the mic and streams it to the desktop app, which plays it into a virtual microphone that Discord, Zoom, OBS and other apps can select. The phone can also play the computer's audio back ("phone as speaker").
+
+## Screenshots
+
+<p align="center">
+  <img src="assets/images/desktop/connected.png" alt="Desktop app streaming from a connected phone" width="760">
+</p>
+
+<p align="center">
+  <img src="assets/images/mobile/home.jpeg" alt="Phone app: pick a computer over Wi-Fi, USB or Bluetooth" width="180">
+  <img src="assets/images/mobile/live.jpeg" alt="Phone app: live and streaming to the computer" width="180">
+  <img src="assets/images/mobile/microphone.jpeg" alt="Phone app: choose the microphone source" width="180">
+  <img src="assets/images/mobile/settings.jpeg" alt="Phone app: audio settings" width="180">
+</p>
 
 ## Features
 
