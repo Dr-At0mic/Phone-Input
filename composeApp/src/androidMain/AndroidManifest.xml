@@ -16,6 +16,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <!-- Self-update from GitHub releases (Android confirms the first install). -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <application
         android:allowBackup="true"
@@ -46,5 +48,9 @@
             android:name="app.phoneinput.android.stream.StreamService"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+
+        <receiver
+            android:name="app.phoneinput.android.update.UpdateInstallReceiver"
+            android:exported="false" />
     </application>
 </manifest>

@@ -42,6 +42,7 @@ import app.phoneinput.android.stream.StreamController
 import app.phoneinput.android.ui.ConnectScreen
 import app.phoneinput.android.ui.LiveScreen
 import app.phoneinput.android.ui.SettingsScreen
+import app.phoneinput.android.update.AppUpdates
 import app.phoneinput.ui.theme.PhoneInputTheme
 import app.phoneinput.ui.theme.PmColors
 
@@ -67,6 +68,11 @@ class MainActivity : ComponentActivity() {
         if (hasFocus) hideNavigationBar()
     }
 
+    override fun onResume() {
+        super.onResume()
+        AppUpdates.checkIfDue(this, AppSettings.get(this).autoUpdate.value)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(Color.TRANSPARENT),
@@ -75,6 +81,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         hideNavigationBar()
         val settings = AppSettings.get(this)
+        AppUpdates.init(this)
         pendingLink.value = intent?.dataString
         setContent {
             PhoneInputTheme {

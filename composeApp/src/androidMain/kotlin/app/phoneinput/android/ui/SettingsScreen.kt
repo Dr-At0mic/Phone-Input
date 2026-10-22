@@ -35,6 +35,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.phoneinput.android.AppSettings
 import app.phoneinput.android.MicSource
+import app.phoneinput.android.update.AppUpdates
+import app.phoneinput.ui.components.summary
+import app.phoneinput.update.UpdateState
+import androidx.compose.ui.platform.LocalContext
 import app.phoneinput.audio.NoiseSuppression
 import app.phoneinput.ui.components.BarIconButton
 import app.phoneinput.ui.components.NavRow
@@ -54,6 +58,9 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit) {
     val compression by settings.compression.state.collectAsState()
     val screenOn by settings.keepScreenOn.state.collectAsState()
     val savedHosts by settings.savedHosts.collectAsState()
+    val autoUpdate by settings.autoUpdate.state.collectAsState()
+    val update by AppUpdates.state.collectAsState()
+    val context = LocalContext.current
     var nsPickerOpen by remember { mutableStateOf(false) }
     var micPickerOpen by remember { mutableStateOf(false) }
 
@@ -91,6 +98,16 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit) {
 
         Group("While streaming") {
             SwitchRow("Keep screen on", screenOn, settings.keepScreenOn::set, subtitle = "Streaming continues with the screen off")
+        }
+
+        Group("Updates") {
+            SwitchRow("Update automatically", autoUpdate, settings.autoUpdate::set, subtitle = "Check when the app opens and download on Wi-Fi")
+            RowDivider()
+            NavRow(
+                "PhoneInput ${AppUpdates.currentVersion ?: "dev"}",
+                subtitle = update.summary(),
+                onClick = { if (update !is UpdateState.Disabled) AppUpdates.check(context) },
+            )
         }
 
         Text(

@@ -58,6 +58,9 @@ import app.phoneinput.audio.Formats
 import app.phoneinput.desktop.DesktopController
 import app.phoneinput.desktop.DesktopState
 import app.phoneinput.desktop.audio.InstallState
+import app.phoneinput.ui.components.UpdateBanner
+import app.phoneinput.ui.components.summary
+import app.phoneinput.update.UpdateState
 import app.phoneinput.desktop.net.StreamServer
 import app.phoneinput.protocol.PhoneInputProtocol
 import app.phoneinput.ui.components.AccentButton
@@ -156,7 +159,7 @@ private fun Sidebar(state: DesktopState, controller: DesktopController, onShowQr
                 recent.forEach { RecentRow(it, onForget = { controller.forgetRecent(it.sessionId) }) }
             }
         }
-        ThisComputer(state, onShowQr)
+        ThisComputer(state, controller, onShowQr)
     }
 }
 
@@ -247,7 +250,7 @@ private fun RecentRow(device: StreamServer.Device, onForget: () -> Unit) {
 }
 
 @Composable
-private fun ThisComputer(state: DesktopState, onShowQr: () -> Unit) {
+private fun ThisComputer(state: DesktopState, controller: DesktopController, onShowQr: () -> Unit) {
     Column(
         Modifier.fillMaxWidth().padding(top = 12.dp).clip(RoundedCornerShape(12.dp)).background(PmColors.Surface).padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -274,6 +277,12 @@ private fun ThisComputer(state: DesktopState, onShowQr: () -> Unit) {
             )
         }
         if (state.pairingUri != null) TextLink("Show QR code", onClick = onShowQr)
+        Text(
+            "PhoneInput ${controller.appVersion ?: "dev"} · ${state.update.summary()}",
+            color = if (state.update is UpdateState.Failed) PmColors.Warn else PmColors.TextMuted,
+            fontSize = 12.sp,
+        )
+        if (state.update !is UpdateState.Disabled) TextLink("Check for updates", onClick = controller::checkForUpdates)
     }
 }
 
@@ -283,6 +292,18 @@ private fun ThisComputer(state: DesktopState, onShowQr: () -> Unit) {
 @Composable
 private fun MainPane(state: DesktopState, controller: DesktopController, modifier: Modifier) {
     Column(modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+        val update = state.update
+        val hidden = (update as? UpdateState.Available)?.release?.version ?: (update as? UpdateState.Ready)?.release?.version
+        if (hidden == null || hidden != state.dismissedUpdate) {
+            UpdateBanner(
+                state = update,
+                installLabel = "Restart to update",
+                onDownload = controller::downloadUpdate,
+                onInstall = controller::installUpdate,
+                onOpenPage = controller::openUrl,
+                onDismiss = controller::dismissUpdate,
+            )
+        }
         state.serverError?.let { Banner(it, PmColors.Danger) }
         if (state.outputError) Banner("Couldn't play into ${state.virtualMic.deviceName}. Retrying…", PmColors.Warn)
         if (state.active == null) {

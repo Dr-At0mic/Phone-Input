@@ -8,6 +8,7 @@ code-scanner = "16.1.0"
 zxing = "3.5.4"
 jna = "5.13.0"
 concentus = "1.0.2"
+serialization = "1.11.0"
 android-compileSdk = "36"
 android-targetSdk = "36"
 android-minSdk = "26"
@@ -20,6 +21,7 @@ androidx-activity-compose = { module = "androidx.activity:activity-compose", ver
 gms-code-scanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "code-scanner" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 concentus = { module = "io.github.jaredmdobson:concentus", version.ref = "concentus" }
 
 [plugins]

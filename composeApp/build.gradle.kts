@@ -12,6 +12,16 @@ plugins {
 val appVersion = (findProperty("appVersion") as String?)?.removePrefix("v") ?: "1.0.0"
 
 kotlin {
+    // jvmSharedMain: code for both JVM platforms (Android and desktop), e.g. HTTP downloads for updates.
+    applyDefaultHierarchyTemplate {
+        common {
+            group("jvmShared") {
+                withAndroidTarget()
+                withJvm()
+            }
+        }
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -34,6 +44,7 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.ui)
             implementation(libs.kotlinx.coroutines.core)
+            implementation(libs.kotlinx.serialization.json)
         }
         commonTest.dependencies {
             implementation(kotlin("test"))
@@ -103,6 +114,10 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Msi, TargetFormat.Deb, TargetFormat.Rpm)
             packageName = "PhoneInput"
+            windows {
+                // Fixed so each new MSI replaces the installed version (the value v1.0.0 shipped with).
+                upgradeUuid = "2CCCE26B-1393-384B-94A2-49ED8BCB690A"
+            }
             packageVersion = appVersion
             description = "Use your phone as a microphone"
             vendor = "Dr-At0mic"

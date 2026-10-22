@@ -146,6 +146,7 @@ fun ConnectScreen(
         }
     }
     val status: @Composable () -> Unit = {
+        AppUpdateBanner()
         if (permissionDenied) Banner("PhoneInput needs microphone permission to stream. Allow it in the prompt or in system settings.", PmColors.Warn)
         stream.lastError?.let { Banner(it, PmColors.Warn) }
         if (!idle) {

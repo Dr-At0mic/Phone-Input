@@ -29,10 +29,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import app.phoneinput.desktop.update.DesktopInstaller
+import app.phoneinput.update.AppVersion
+import app.phoneinput.update.UpdateState
+import app.phoneinput.update.Updater
 import java.awt.Desktop
 import java.net.BindException
 import java.net.URI
 import java.util.prefs.Preferences
+import kotlin.system.exitProcess
 
 data class DesktopState(
     val hostName: String,
@@ -57,6 +62,11 @@ data class DesktopState(
     val serverError: String? = null,
     val usb: UsbStatus = UsbStatus(),
     val bluetooth: BluetoothStatus = BluetoothStatus(),
+    val update: UpdateState = UpdateState.Idle,
+    /** Look for updates on start and every few hours, and download them in the background. */
+    val autoUpdate: Boolean = true,
+    /** The user chose "Later" for this version; the banner stays hidden until a newer one appears. */
+    val dismissedUpdate: AppVersion? = null,
 ) {
     /** What the QR code encodes: a phoneinput:// link with this computer's LAN addresses. */
     val pairingUri: String? get() = if (addresses.isEmpty()) null else PairingUri.build(PairingInfo(hostName, addresses, PhoneInputProtocol.AUDIO_PORT, HostInfo.os))
@@ -77,6 +87,7 @@ class DesktopController : AutoCloseable {
             gainDb = prefs.getFloat(KEY_GAIN, 0f),
             monitor = prefs.getBoolean(KEY_MONITOR, false),
             canInstallDriver = HostInfo.os == HostOs.Windows,
+            autoUpdate = prefs.getBoolean(KEY_AUTO_UPDATE, true),
         ),
     )
     val state: StateFlow<DesktopState> = _state.asStateFlow()
@@ -88,6 +99,19 @@ class DesktopController : AutoCloseable {
     private var pump: AudioPump? = null
     private val adb = AdbBridge(PhoneInputProtocol.USB_PORT, HostInfo.os) { status -> _state.update { it.copy(usb = status) } }
     private val speaker = SpeakerStreamer(server, HostInfo.os).also { server.onSpeakerListeners = it::onListeners }
+    private val updater = Updater(
+        currentVersion = DesktopInstaller.currentVersion,
+        downloadDir = DesktopInstaller.downloadDir,
+        scope = scope,
+        pickAsset = DesktopInstaller::pickAsset,
+        install = { file, release ->
+            DesktopInstaller.launch(file)
+            Log.i("Quitting to install ${release.version}")
+            close()
+            exitProcess(0)
+        },
+        log = { message, error -> if (error == null) Log.i(message) else Log.w("$message: ${error.message}") },
+    )
     private val bluetooth = BluetoothBridge(server, HostInfo.os, "PhoneInput on $hostName") { status -> _state.update { it.copy(bluetooth = status) } }
 
     /**
@@ -111,6 +135,15 @@ class DesktopController : AutoCloseable {
         discovery.start()
         adb.start()
         bluetooth.start()
+
+        scope.launch { updater.state.collect { u -> _state.update { it.copy(update = u) } } }
+        scope.launch {
+            delay(5_000) // let startup settle first
+            while (isActive) {
+                if (_state.value.autoUpdate) updater.check(autoDownload = true)
+                delay(Updater.CHECK_INTERVAL_MS)
+            }
+        }
 
         scope.launch {
             server.snapshot.collect { snap -> _state.update { it.copy(devices = snap.devices) } }
@@ -200,6 +233,33 @@ class DesktopController : AutoCloseable {
     /** Downloads Google's platform-tools so USB connections work without the Android SDK. */
     fun installAdb() = adb.installPlatformTools()
 
+    val appVersion: AppVersion? get() = updater.currentVersion
+
+    fun checkForUpdates() {
+        _state.update { it.copy(dismissedUpdate = null) }
+        updater.check(autoDownload = _state.value.autoUpdate)
+    }
+
+    fun downloadUpdate() = updater.download()
+
+    /** Quits PhoneInput, installs the downloaded version and starts it again. */
+    fun installUpdate() = updater.install()
+
+    fun dismissUpdate() {
+        val version = when (val u = _state.value.update) {
+            is UpdateState.Available -> u.release.version
+            is UpdateState.Ready -> u.release.version
+            else -> return
+        }
+        _state.update { it.copy(dismissedUpdate = version) }
+    }
+
+    fun setAutoUpdate(on: Boolean) {
+        _state.update { it.copy(autoUpdate = on) }
+        prefs.putBoolean(KEY_AUTO_UPDATE, on)
+        if (on) updater.check(autoDownload = true)
+    }
+
     fun setMuted(muted: Boolean) = _state.update { it.copy(muted = muted) }
 
     fun setGain(db: Float) {
@@ -254,5 +314,6 @@ class DesktopController : AutoCloseable {
     private companion object {
         const val KEY_GAIN = "gainDb"
         const val KEY_MONITOR = "monitor"
+        const val KEY_AUTO_UPDATE = "autoUpdate"
     }
 }

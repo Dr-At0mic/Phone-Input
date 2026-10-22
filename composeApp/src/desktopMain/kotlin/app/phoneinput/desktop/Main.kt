@@ -30,6 +30,7 @@ import app.phoneinput.desktop.ui.TitleText
 import app.phoneinput.desktop.ui.WindowChrome
 import app.phoneinput.desktop.ui.WindowFrame
 import app.phoneinput.ui.icons.PmIcons
+import app.phoneinput.update.UpdateState
 import app.phoneinput.ui.theme.PhoneInputTheme
 import java.awt.Dimension
 import java.awt.SystemTray
@@ -86,6 +87,9 @@ private fun runApp(controller: DesktopController) = application {
                 if (state.connected.isNotEmpty()) Separator()
                 Item(if (state.muted) "Unmute" else "Mute", onClick = { controller.setMuted(!state.muted) })
                 Item("Show PhoneInput", onClick = { windowVisible = true })
+                if (state.update !is UpdateState.Disabled) {
+                    CheckboxItem("Update automatically", checked = state.autoUpdate, onCheckedChange = controller::setAutoUpdate)
+                }
                 Separator()
                 Item("Quit", onClick = quit)
             },

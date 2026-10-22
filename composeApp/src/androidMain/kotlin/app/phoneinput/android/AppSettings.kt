@@ -87,6 +87,9 @@ class AppSettings private constructor(context: Context) {
     val compression = BoolPref("compression", true)
     val keepScreenOn = BoolPref("keepScreenOn", false)
 
+    /** Check for new releases when the app opens and download them on Wi-Fi. */
+    val autoUpdate = BoolPref("autoUpdate", true)
+
     private val _savedHosts = MutableStateFlow(readSavedHosts())
 
     /** Computers the user connected to before, most recently used first. Editable and removable. */
