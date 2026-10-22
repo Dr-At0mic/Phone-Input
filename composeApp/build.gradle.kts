@@ -105,8 +105,14 @@ compose.desktop {
             packageName = "PhoneInput"
             packageVersion = appVersion
             description = "Use your phone as a microphone"
+            vendor = "Dr-At0mic"
+            licenseFile.set(rootProject.file("LICENSE"))
             linux {
                 packageName = "phoneinput"
+                appCategory = "sound"
+                menuGroup = "AudioVideo;Audio;"
+                debMaintainer = "Dr-At0mic <92196795+Dr-At0mic@users.noreply.github.com>"
+                rpmLicenseType = "GPL-3.0-only"
             }
         }
     }
