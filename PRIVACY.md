@@ -24,7 +24,7 @@ The "Scan QR" button uses the Google Play services code scanner. Google Play ser
 
 - Between your phone and your computer, as described above.
 - **Version from GitHub only:** the phone app downloaded from GitHub checks `api.github.com` for new releases and downloads updates from GitHub. GitHub receives the usual request information, such as your IP address, under [GitHub's privacy statement](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). The **Google Play version does not do this**: Google Play delivers its updates.
-- **Computer app:** it checks GitHub for updates. When you choose to install a helper, it downloads the VB-Audio virtual cable from vb-audio.com or Google's Android platform-tools (for USB) from Google.
+- **Computer app:** the version downloaded from GitHub checks GitHub for updates; the **Microsoft Store version** gets its updates from the Microsoft Store instead. When you choose to install a helper, it downloads the VB-Audio virtual cable from vb-audio.com or Google's Android platform-tools (for USB) from Google.
 
 ## Children
 
