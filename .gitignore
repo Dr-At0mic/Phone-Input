@@ -22,3 +22,6 @@ docs/
 /promo
 /screen_shots
 /compressed
+# Google Play bundles (uploaded to Play Console by hand)
+/play-store
+*.aab

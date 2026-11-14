@@ -74,10 +74,13 @@ Requires JDK 17+ and the Android SDK (`local.properties` → `sdk.dir`).
 ```bash
 ./gradlew :composeApp:desktopTest        # protocol, jitter buffer and UDP loopback tests
 ./gradlew :composeApp:run                # desktop app
-./gradlew :composeApp:assembleDebug      # Android APK → composeApp/build/outputs/apk/debug/
-./gradlew :composeApp:installDebug       # install on a connected phone
+./gradlew :composeApp:assembleGithubDebug   # Android APK → composeApp/build/outputs/apk/github/debug/
+./gradlew :composeApp:installGithubDebug    # install on a connected phone
+./gradlew :composeApp:bundlePlayRelease     # Google Play bundle → composeApp/build/outputs/bundle/playRelease/
 ./gradlew :composeApp:packageDistributionForCurrentOS   # MSI (needs WiX) / DEB / RPM
 ```
+
+The Android app has two builds of the same code: **github** (the APK on GitHub Releases, which updates itself from there) and **play** (for Google Play: Play delivers updates, so it has no self-updater and no install-packages permission). Both use the package name `app.phoneinput`; Google re-signs the Play build, so the two can't update each other. Privacy policy: [PRIVACY.md](PRIVACY.md).
 
 ## Virtual microphone setup
 

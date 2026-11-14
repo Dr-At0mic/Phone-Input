@@ -59,22 +59,29 @@ jobs:
         run: |
           echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
-      - name: Build release APK
+      # GitHub APK (self-updating) and the Google Play bundle (no self-updater), same signing key.
+      - name: Build release APK and Play bundle
         env:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew :composeApp:assembleRelease ${{ env.APP_VERSION_ARG }} --stacktrace
+        run: ./gradlew :composeApp:assembleGithubRelease :composeApp:bundlePlayRelease ${{ env.APP_VERSION_ARG }} --stacktrace
       - name: Rename
         run: |
           version=$(echo "${APP_VERSION#v}" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' || echo dev)
-          mkdir dist
-          apk=$(ls composeApp/build/outputs/apk/release/*.apk | head -1)
+          mkdir dist play
+          apk=$(ls composeApp/build/outputs/apk/github/release/*.apk | head -1)
           cp "$apk" "dist/PhoneInput-$version.apk"
+          cp composeApp/build/outputs/bundle/playRelease/*.aab "play/PhoneInput-$version-play.aab"
       - uses: actions/upload-artifact@v7
         with:
           name: android
           path: dist/*
+      # Uploaded to Play Console by hand; not attached to the GitHub release.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: play-store
+          path: play/*
 
   linux:
     name: Linux DEB + RPM
@@ -139,6 +146,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           path: dist
+          pattern: '{android,linux,windows}'
           merge-multiple: true
       - name: Checksums
         run: cd dist && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt

@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.phoneinput.android.AppSettings
 import app.phoneinput.android.MicSource
+import app.phoneinput.BuildConfig
 import app.phoneinput.android.update.AppUpdates
 import app.phoneinput.ui.components.summary
 import app.phoneinput.update.UpdateState
@@ -101,13 +102,17 @@ fun SettingsScreen(settings: AppSettings, onBack: () -> Unit) {
         }
 
         Group("Updates") {
-            SwitchRow("Update automatically", autoUpdate, settings.autoUpdate::set, subtitle = "Check when the app opens and download on Wi-Fi")
-            RowDivider()
-            NavRow(
-                "PhoneInput ${AppUpdates.currentVersion ?: "dev"}",
-                subtitle = update.summary(),
-                onClick = { if (update !is UpdateState.Disabled) AppUpdates.check(context) },
-            )
+            if (AppUpdates.selfUpdate) {
+                SwitchRow("Update automatically", autoUpdate, settings.autoUpdate::set, subtitle = "Check when the app opens and download on Wi-Fi")
+                RowDivider()
+                NavRow(
+                    "PhoneInput ${AppUpdates.currentVersion ?: "dev"}",
+                    subtitle = update.summary(),
+                    onClick = { if (update !is UpdateState.Disabled) AppUpdates.check(context) },
+                )
+            } else {
+                NavRow("PhoneInput ${BuildConfig.VERSION_NAME}", subtitle = "Updates come from Google Play")
+            }
         }
 
         Text(

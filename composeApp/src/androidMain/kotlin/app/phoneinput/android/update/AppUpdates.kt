@@ -16,6 +16,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.IntentCompat
+import app.phoneinput.BuildConfig
 import app.phoneinput.R
 import app.phoneinput.android.MainActivity
 import app.phoneinput.update.AppVersion
@@ -45,8 +46,11 @@ object AppUpdates {
     val state: StateFlow<UpdateState> get() = updater?.state ?: disabled
     val currentVersion: AppVersion? get() = updater?.currentVersion
 
+    /** False in the Google Play build, where Play installs updates. */
+    val selfUpdate: Boolean get() = BuildConfig.SELF_UPDATE
+
     fun init(context: Context) {
-        if (updater != null) return
+        if (updater != null || !selfUpdate) return
         val app = context.applicationContext
         val info = app.packageManager.getPackageInfo(app.packageName, 0)
         // Debug builds are signed with a different key, so a release APK couldn't replace them.

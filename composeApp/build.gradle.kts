@@ -79,6 +79,26 @@ android {
         versionCode = appVersion.split('.').fold(0) { code, part -> code * 100 + part.toInt() }
         versionName = appVersion
     }
+    buildFeatures {
+        buildConfig = true
+    }
+    // Two Android builds from the same code: "github" is the APK on GitHub Releases (updates itself
+    // from there), "play" is the bundle for Google Play (Play delivers updates; no self-updater and no
+    // REQUEST_INSTALL_PACKAGES, which Play doesn't allow). Same package name: Play re-signs its build
+    // with Google's key, so the two can't replace each other.
+    flavorDimensions += "store"
+    productFlavors {
+        create("github") {
+            dimension = "store"
+            buildConfigField("boolean", "SELF_UPDATE", "true")
+        }
+        create("play") {
+            dimension = "store"
+            buildConfigField("boolean", "SELF_UPDATE", "false")
+        }
+    }
+    // Removes the updater's permission and receivers from the Play build's merged manifest.
+    sourceSets.getByName("play").manifest.srcFile("src/androidPlay/AndroidManifest.xml")
     // Release signing comes from the environment (CI secrets); without it the release APK is unsigned.
     val keystore = System.getenv("ANDROID_KEYSTORE_PATH")?.let(::file)?.takeIf { it.exists() }
     signingConfigs {
