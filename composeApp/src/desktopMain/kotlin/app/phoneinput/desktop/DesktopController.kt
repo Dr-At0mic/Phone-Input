@@ -15,6 +15,7 @@ import app.phoneinput.desktop.net.BluetoothStatus
 import app.phoneinput.desktop.net.SpeakerStreamer
 import app.phoneinput.desktop.net.UsbStatus
 import app.phoneinput.desktop.win.Autostart
+import app.phoneinput.desktop.win.StorePackage
 import app.phoneinput.protocol.PairingInfo
 import app.phoneinput.protocol.PairingUri
 import app.phoneinput.protocol.HostOs
@@ -104,7 +105,8 @@ class DesktopController : AutoCloseable {
     private val adb = AdbBridge(PhoneInputProtocol.USB_PORT, HostInfo.os) { status -> _state.update { it.copy(usb = status) } }
     private val speaker = SpeakerStreamer(server, HostInfo.os).also { server.onSpeakerListeners = it::onListeners }
     private val updater = Updater(
-        currentVersion = DesktopInstaller.currentVersion,
+        // The Microsoft Store package is updated by the Store, not from GitHub.
+        currentVersion = DesktopInstaller.currentVersion.takeUnless { StorePackage.isPackaged },
         downloadDir = DesktopInstaller.downloadDir,
         scope = scope,
         pickAsset = DesktopInstaller::pickAsset,
@@ -134,7 +136,7 @@ class DesktopController : AutoCloseable {
     }
 
     fun start() {
-        Log.i("PhoneInput starting on ${HostInfo.os} as $hostName, LAN ${_state.value.addresses}")
+        Log.i("PhoneInput ${DesktopInstaller.currentVersion ?: "dev"} (${if (StorePackage.isPackaged) "Microsoft Store" else "GitHub"} build) starting on ${HostInfo.os} as $hostName, LAN ${_state.value.addresses}")
         server.start()
         discovery.start()
         adb.start()
@@ -237,7 +239,7 @@ class DesktopController : AutoCloseable {
     /** Downloads Google's platform-tools so USB connections work without the Android SDK. */
     fun installAdb() = adb.installPlatformTools()
 
-    val appVersion: AppVersion? get() = updater.currentVersion
+    val appVersion: AppVersion? get() = DesktopInstaller.currentVersion
 
     fun checkForUpdates() {
         _state.update { it.copy(dismissedUpdate = null) }

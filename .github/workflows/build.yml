@@ -110,7 +110,7 @@ jobs:
           path: dist/*
 
   windows:
-    name: Windows MSI + EXE
+    name: Windows MSI + EXE + Store MSIX
     needs: test
     runs-on: windows-latest
     steps:
@@ -120,8 +120,13 @@ jobs:
           distribution: temurin
           java-version: 21
       - uses: gradle/actions/setup-gradle@v6
-      - run: ./gradlew :composeApp:packageMsi :composeApp:packageExe ${{ env.APP_VERSION_ARG }} --stacktrace
+      # MSI + EXE for GitHub Releases (self-updating), and the app image the Store package is made from.
+      - run: ./gradlew :composeApp:packageMsi :composeApp:packageExe :composeApp:createDistributable ${{ env.APP_VERSION_ARG }} --stacktrace
         shell: bash
+      # Microsoft Store package: same app, updates come from the Store. Unsigned; Partner Center signs it.
+      - name: Build Store package
+        shell: pwsh
+        run: ./composeApp/packaging/msix/make-msix.ps1
       - name: Rename
         shell: bash
         run: |
@@ -129,10 +134,17 @@ jobs:
           mkdir dist
           cp composeApp/build/compose/binaries/main/msi/*.msi "dist/PhoneInput-$version.msi"
           cp composeApp/build/compose/binaries/main/exe/*.exe "dist/PhoneInput-$version.exe"
+          mkdir store
+          cp composeApp/build/msix/*.msix store/
       - uses: actions/upload-artifact@v7
         with:
           name: windows
           path: dist/*
+      # Uploaded to Partner Center by hand; not attached to the GitHub release.
+      - uses: actions/upload-artifact@v7
+        with:
+          name: microsoft-store
+          path: store/*
 
   release:
     name: GitHub Release
@@ -148,6 +160,9 @@ jobs:
           path: dist
           pattern: '{android,linux,windows}'
           merge-multiple: true
+      # Store builds (Play .aab, Microsoft .msix) are never published on GitHub.
+      - name: Drop store-only files
+        run: rm -f dist/*.aab dist/*.msix && ls dist
       - name: Checksums
         run: cd dist && sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
       - name: Publish

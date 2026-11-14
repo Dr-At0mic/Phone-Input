@@ -17,7 +17,8 @@ object Autostart {
 
     private val exe: String? = ProcessHandle.current().info().command().orElse(null)
 
-    val supported: Boolean = HostInfo.os == HostOs.Windows && DesktopInstaller.currentVersion != null && exe != null
+    val supported: Boolean = HostInfo.os == HostOs.Windows && DesktopInstaller.currentVersion != null && exe != null &&
+        !StorePackage.isPackaged
 
     fun isEnabled(): Boolean = supported && reg("query", RUN_KEY, "/v", VALUE)
 

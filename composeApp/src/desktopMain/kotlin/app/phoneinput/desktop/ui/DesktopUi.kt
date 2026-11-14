@@ -62,6 +62,7 @@ import app.phoneinput.ui.components.UpdateBanner
 import app.phoneinput.ui.components.summary
 import app.phoneinput.update.UpdateState
 import app.phoneinput.desktop.net.StreamServer
+import app.phoneinput.desktop.win.StorePackage
 import app.phoneinput.protocol.PhoneInputProtocol
 import app.phoneinput.ui.components.AccentButton
 import app.phoneinput.ui.components.Banner
@@ -278,11 +279,16 @@ private fun ThisComputer(state: DesktopState, controller: DesktopController, onS
         }
         if (state.pairingUri != null) TextLink("Show QR code", onClick = onShowQr)
         Text(
-            "PhoneInput ${controller.appVersion ?: "dev"} · ${state.update.summary()}",
+            "PhoneInput ${controller.appVersion ?: "dev"} · " +
+                if (StorePackage.isPackaged) "Updates from the Microsoft Store" else state.update.summary(),
             color = if (state.update is UpdateState.Failed) PmColors.Warn else PmColors.TextMuted,
             fontSize = 12.sp,
         )
-        if (state.update !is UpdateState.Disabled) TextLink("Check for updates", onClick = controller::checkForUpdates)
+        if (StorePackage.isPackaged) {
+            TextLink("Check for updates", onClick = StorePackage::openStorePage)
+        } else if (state.update !is UpdateState.Disabled) {
+            TextLink("Check for updates", onClick = controller::checkForUpdates)
+        }
     }
 }
 

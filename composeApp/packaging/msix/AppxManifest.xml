@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Microsoft Store package (MSIX) for the Windows desktop app. make-msix.ps1 fills in the version.
+  Identity values come from Partner Center (Product identity) and must match it exactly.
+-->
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:desktop="http://schemas.microsoft.com/appx/manifest/desktop/windows10"
+  xmlns:desktop2="http://schemas.microsoft.com/appx/manifest/desktop/windows10/2"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap desktop desktop2 rescap">
+
+  <Identity
+    Name="DrAtomic.PhoneInput"
+    Publisher="CN=59C61989-EB11-480C-9DAE-138946F0898B"
+    Version="@VERSION@"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>Phone Input</DisplayName>
+    <PublisherDisplayName>Dr Atomic</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+    <Description>Use your Android phone as your PC's microphone.</Description>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="en-us" />
+  </Resources>
+
+  <Applications>
+    <Application Id="PhoneInput" Executable="PhoneInput.exe" EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="Phone Input"
+        Description="Use your Android phone as your PC's microphone."
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
+      </uap:VisualElements>
+      <Extensions>
+        <!-- "Start with Windows": off until the user turns it on in Settings › Apps › Startup.
+             PhoneInputTray.exe is the same launcher with the default argument tray. -->
+        <desktop:Extension Category="windows.startupTask" Executable="PhoneInputTray.exe" EntryPoint="Windows.FullTrustApplication">
+          <desktop:StartupTask TaskId="PhoneInputStartup" Enabled="false" DisplayName="Phone Input" />
+        </desktop:Extension>
+      </Extensions>
+    </Application>
+  </Applications>
+
+  <Extensions>
+    <!-- Phones send audio (UDP 5823) and discover the PC (UDP 5824) on the local network.
+         TCP 5825 (USB) listens on 127.0.0.1 only and needs no rule. -->
+    <desktop2:Extension Category="windows.firewallRules">
+      <desktop2:FirewallRules Executable="PhoneInput.exe">
+        <desktop2:Rule Direction="in" IPProtocol="UDP" LocalPortMin="5823" LocalPortMax="5824" Profile="all" />
+      </desktop2:FirewallRules>
+    </desktop2:Extension>
+    <desktop2:Extension Category="windows.firewallRules">
+      <desktop2:FirewallRules Executable="PhoneInputTray.exe">
+        <desktop2:Rule Direction="in" IPProtocol="UDP" LocalPortMin="5823" LocalPortMax="5824" Profile="all" />
+      </desktop2:FirewallRules>
+    </desktop2:Extension>
+  </Extensions>
+
+  <Capabilities>
+    <Capability Name="internetClient" />
+    <Capability Name="privateNetworkClientServer" />
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

@@ -30,6 +30,7 @@ import app.phoneinput.desktop.ui.TitleText
 import app.phoneinput.desktop.ui.WindowChrome
 import app.phoneinput.desktop.ui.WindowFrame
 import app.phoneinput.desktop.win.Autostart
+import app.phoneinput.desktop.win.StorePackage
 import app.phoneinput.ui.icons.PmIcons
 import app.phoneinput.update.UpdateState
 import app.phoneinput.ui.theme.PhoneInputTheme
@@ -91,9 +92,13 @@ private fun runApp(controller: DesktopController, startInTray: Boolean) = applic
                 Item("Show PhoneInput", onClick = { windowVisible = true })
                 if (state.update !is UpdateState.Disabled) {
                     CheckboxItem("Update automatically", checked = state.autoUpdate, onCheckedChange = controller::setAutoUpdate)
+                } else if (StorePackage.isPackaged) {
+                    Item("Check for updates", onClick = StorePackage::openStorePage)
                 }
                 if (Autostart.supported) {
                     CheckboxItem("Start with Windows", checked = state.startWithWindows, onCheckedChange = controller::setStartWithWindows)
+                } else if (StorePackage.isPackaged) {
+                    Item("Start with Windows…", onClick = StorePackage::openStartupSettings)
                 }
                 Separator()
                 Item("Quit", onClick = quit)

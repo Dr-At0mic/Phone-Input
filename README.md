@@ -82,6 +82,8 @@ Requires JDK 17+ and the Android SDK (`local.properties` → `sdk.dir`).
 
 The Android app has two builds of the same code: **github** (the APK on GitHub Releases, which updates itself from there) and **play** (for Google Play: Play delivers updates, so it has no self-updater and no install-packages permission). Both use the package name `app.phoneinput`; Google re-signs the Play build, so the two can't update each other. Privacy policy: [PRIVACY.md](PRIVACY.md).
 
+The Windows app is also built as a **Microsoft Store** package (`composeApp/packaging/msix/make-msix.ps1` after `createDistributable`; identity in `AppxManifest.xml`). It's the same app: when it runs from the Store package it turns off the GitHub updater (Check for updates opens its Store page) and uses Windows' Startup apps setting for "Start with Windows". CI uploads the `.aab` and `.msix` as separate `play-store` and `microsoft-store` artifacts; neither is attached to GitHub releases.
+
 ## Virtual microphone setup
 
 - **Windows**: install the free [VB-CABLE](https://vb-audio.com/Cable/) driver (PhoneInput offers to download and launch VB-Audio's setup if it is missing). PhoneInput plays into *CABLE Input*; choose **CABLE Output (VB-Audio Virtual Cable)** as the microphone in other apps.
